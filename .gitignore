@@ -1,0 +1,15 @@
+# Visual Studio
+.vs/
+
+# .NET
+bin/
+obj/
+
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
