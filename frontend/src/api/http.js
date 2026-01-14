@@ -1,5 +1,10 @@
-// Use explicit backend base in dev, and relative base when built and served from backend
-const API_BASE = import.meta.env && import.meta.env.DEV ? "http://localhost:5032" : "";
+// Use explicit backend base in dev, and relative base when built and served from backend.
+// Accept either Vite's import.meta.env.DEV or a browser session running on port 5173
+// (useful when someone opens index.html directly in dev-like setup).
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) ||
+  (typeof window !== 'undefined' && window.location && window.location.port === '5173')
+  ? 'http://localhost:5032'
+  : '';
 
 function getToken() {
   return localStorage.getItem("token");
