@@ -53,7 +53,7 @@ namespace Backedn.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Backedn.Api.Domain.Entities.User", b =>
@@ -81,7 +81,7 @@ namespace Backedn.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 #pragma warning restore 612, 618
         }
