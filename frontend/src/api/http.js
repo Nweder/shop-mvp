@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:5032";
+// Use explicit backend base in dev, and relative base when built and served from backend
+const API_BASE = import.meta.env && import.meta.env.DEV ? "http://localhost:5032" : "";
 
 function getToken() {
   return localStorage.getItem("token");
