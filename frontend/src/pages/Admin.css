@@ -1,0 +1,18 @@
+/* Admin page responsive styles */
+.admin-container{max-width:700px;margin:0 auto;padding:16px}
+.admin-form{display:grid;gap:8;grid-template-columns:1fr 120px 120px 140px 160px 120px}
+.admin-form input, .admin-form select{padding:8px;border-radius:6px;border:1px solid #ddd}
+.admin-list{margin-top:16px;padding:0;list-style:none}
+.admin-list li{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.admin-list img{width:48px;height:48px;object-fit:cover;border-radius:6px}
+
+@media (max-width:900px){
+  .admin-form{grid-template-columns:1fr 120px 120px 140px}
+}
+
+@media (max-width:600px){
+  .admin-form{grid-template-columns:1fr;}
+  .admin-form input, .admin-form select, .admin-form button{width:100%;}
+  .admin-list{padding:0}
+  .admin-list li{flex-direction:column;align-items:flex-start}
+}
