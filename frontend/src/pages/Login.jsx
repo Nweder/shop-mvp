@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiPost } from "../api/http";
+import './Admin.css'
 
 export default function Login() {
   const [email, setEmail] = useState("admin@webshop.se");
@@ -20,7 +21,7 @@ export default function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 360 }}>
+    <div className="admin-container">
       <h1>Admin Login</h1>
 
       <form onSubmit={onSubmit} style={{ display: "grid", gap: 8 }}>
