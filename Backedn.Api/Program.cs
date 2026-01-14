@@ -64,7 +64,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("frontend");
 
-// (Kör HTTP nu. HTTPS kan vi slå på senare.)
+// Serve files from wwwroot (product images, etc.)
+app.UseStaticFiles();
+
+// (Kï¿½r HTTP nu. HTTPS kan vi slï¿½ pï¿½ senare.)
 // app.UseHttpsRedirection();
 
 app.UseAuthentication();
