@@ -1,16 +1,27 @@
-namespace Backedn.Api.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
 
-public class Product
+namespace Backedn.Api.Dtos.Products;
+
+public class ProductUpsertRequest
 {
-    public int Id { get; set; }
+    [Required, MaxLength(150)]
     public string Name { get; set; } = string.Empty;
+
+    [Required, MaxLength(4000)]
     public string Description { get; set; } = string.Empty;
+
+    [Range(0, 1_000_000)]
     public decimal Price { get; set; }
+
+    [Required]
     public string Category { get; set; } = string.Empty;
+
+    [Range(0, 100_000)]
     public int Stock { get; set; }
+
+    [Required, MaxLength(64)]
     public string Sku { get; set; } = string.Empty;
+
     public bool IsActive { get; set; } = true;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+    public List<string> ImageUrls { get; set; } = [];
 }
