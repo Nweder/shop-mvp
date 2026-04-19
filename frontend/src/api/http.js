@@ -1,9 +1,10 @@
 import axios from "axios";
 
 export const API_BASE =
-  typeof window !== "undefined" && window.location.port === "5173"
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== "undefined" && window.location.port === "5173"
     ? "http://localhost:5032"
-    : "";
+    : "");
 
 export const http = axios.create({
   baseURL: API_BASE,
