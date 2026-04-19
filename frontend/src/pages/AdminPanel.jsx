@@ -61,7 +61,7 @@ export default function AdminPanel() {
 
       setForm((current) => ({
         ...current,
-        imageUrls: [...current.imageUrls, response.data.imageUrl],
+        imageUrls: [...current.imageUrls, response.data.fullUrl ?? response.data.imageUrl],
       }));
     } catch (error) {
       setMessage(extractApiError(error, "Bilduppladdningen misslyckades."));
