@@ -2,8 +2,10 @@ using Backedn.Api.Domain.Entities;
 using Backedn.Api.Dtos.Products;
 using Backedn.Api.Infrastructure.Data;
 using Backedn.Api.Infrastructure.Security;
+using Backedn.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backedn.Api.Controllers;
@@ -12,11 +14,16 @@ namespace Backedn.Api.Controllers;
 [Route("api/products")]
 public class ProductsController : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
+    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+    private static readonly string[] AllowedContentTypes = ["image/jpeg", "image/png", "image/webp"];
 
-    public ProductsController(ApplicationDbContext dbContext)
+    private readonly ApplicationDbContext _dbContext;
+    private readonly IFileStorageService _fileStorageService;
+
+    public ProductsController(ApplicationDbContext dbContext, IFileStorageService fileStorageService)
     {
         _dbContext = dbContext;
+        _fileStorageService = fileStorageService;
     }
 
     [HttpGet]
@@ -66,6 +73,7 @@ public class ProductsController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = AppRoles.Admin)]
+    [EnableRateLimiting("admin")]
     public async Task<ActionResult<ProductDto>> Create([FromBody] ProductUpsertRequest request)
     {
         if (!ModelState.IsValid)
@@ -110,6 +118,7 @@ public class ProductsController : ControllerBase
 
     [HttpPut("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
+    [EnableRateLimiting("admin")]
     public async Task<ActionResult<ProductDto>> Update(int id, [FromBody] ProductUpsertRequest request)
     {
         if (!ModelState.IsValid)
@@ -160,6 +169,7 @@ public class ProductsController : ControllerBase
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = AppRoles.Admin)]
+    [EnableRateLimiting("admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var product = await _dbContext.Products.FindAsync(id);
@@ -175,18 +185,24 @@ public class ProductsController : ControllerBase
 
     [HttpPost("upload")]
     [Authorize(Roles = AppRoles.Admin)]
-    public async Task<IActionResult> Upload(IFormFile file)
+    [EnableRateLimiting("upload")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> Upload(IFormFile file, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
         {
             return BadRequest(new { message = "Ingen fil skickades med." });
         }
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(extension))
+        if (!AllowedExtensions.Contains(extension))
         {
             return BadRequest(new { message = "Endast JPG, PNG och WEBP är tillåtna." });
+        }
+
+        if (!AllowedContentTypes.Contains(file.ContentType))
+        {
+            return BadRequest(new { message = "Ogiltig filtyp." });
         }
 
         if (file.Length > 5 * 1024 * 1024)
@@ -194,20 +210,14 @@ public class ProductsController : ControllerBase
             return BadRequest(new { message = "Filen får vara max 5 MB." });
         }
 
-        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
-        Directory.CreateDirectory(uploadsPath);
-
         var fileName = $"{Guid.NewGuid():N}{extension}";
-        var filePath = Path.Combine(uploadsPath, fileName);
+        await using var stream = file.OpenReadStream();
+        var saved = await _fileStorageService.SaveProductImageAsync(stream, fileName, file.ContentType, cancellationToken);
 
-        await using var stream = System.IO.File.Create(filePath);
-        await file.CopyToAsync(stream);
-
-        var imageUrl = $"/images/products/{fileName}";
         return Ok(new
         {
-            imageUrl,
-            fullUrl = $"{Request.Scheme}://{Request.Host}{imageUrl}"
+            imageUrl = saved.RelativePath,
+            fullUrl = saved.PublicUrl
         });
     }
 

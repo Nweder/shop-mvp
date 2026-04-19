@@ -1,109 +1,108 @@
-🛒 Digital Store Platform
+# Silveria
 
-## Overview
+Silveria is a production-oriented e-commerce platform with:
+- ASP.NET Core Web API backend
+- React storefront frontend
+- Stripe checkout support
+- Admin-only management panel
+- Guest checkout for customers
 
-This project is a full-stack **digital store platform** designed to support online product sales through a modern, scalable, and maintainable web architecture. The solution clearly separates customer-facing functionality from administrative management and is built with long-term extensibility in mind.
+## Current Deployment Direction
 
-The platform provides a solid foundation for a complete e-commerce system and is designed to support future expansion such as payment processing, order management, and inventory handling.
+The repo is being prepared for:
+- Frontend on Azure Static Web Apps
+- Backend on Azure App Service
+- Azure SQL for production/staging data
+- Azure Blob Storage for product images
+- Azure Key Vault / App Settings for secrets
 
-## Business Scope
+## Environments
 
-The system functions as a flexible digital commerce foundation. While the current implementation focuses on product management, administration, and secure access control, the architecture is prepared for integrating:
+### Development
+- Backend: SQLite
+- Frontend: Vite dev server
+- Local image storage in `wwwroot/images/products`
 
-* Online payment providers
-* Order and transaction handling
-* Inventory and fulfillment workflows
+### Staging / Production
+- Backend: SQL Server connection string from Azure
+- Frontend: API base URL from `VITE_API_BASE_URL`
+- Product images: Azure Blob Storage
+- Secrets: Azure App Settings and optionally Key Vault
 
-## Core Features
+## Local Run
 
-* Digital product catalog with support for multiple images per product
-* Customer-facing storefront for browsing products and viewing detailed product information
-* Administrative panel for managing products, pricing, and media assets
-* Secure authentication with role-based authorization (Admin / User)
-* RESTful backend API enforcing business rules and validation
-* Planned support for payment processing and order management
+### Backend
+```powershell
+dotnet run --project Backedn.Api\Backedn.Api.csproj --launch-profile http
+```
 
-## Clean Architecture Design
+### Frontend
+```powershell
+cd frontend
+npm install
+npm run dev
+```
 
-The project follows **Clean Architecture principles**, ensuring a clear separation of concerns and long-term maintainability.
+## Azure Staging Setup
 
-### Architecture Layers
+### Backend App Service
+Create an Azure App Service for the API and configure these app settings:
 
-* **Domain Layer**
-  Contains core business entities and domain rules. This layer is independent of frameworks and infrastructure.
+- `ASPNETCORE_ENVIRONMENT=Staging`
+- `ConnectionStrings__DefaultConnection=<azure sql connection string>`
+- `Database__Provider=SqlServer`
+- `Jwt__Key=<long random secret>`
+- `Jwt__Issuer=Silveria.Staging`
+- `Jwt__Audience=Silveria.Frontend.Staging`
+- `Stripe__SecretKey=<stripe test secret>`
+- `Stripe__PublishableKey=<stripe test publishable>`
+- `Stripe__WebhookSecret=<stripe webhook secret>`
+- `BlobStorage__ConnectionString=<azure blob connection string>`
+- `BlobStorage__ContainerName=product-images-staging`
+- `Security__AdminCookieName=silveria_admin_staging`
+- `AdminSeed__Email=admin@silveria.se`
+- `AdminSeed__Password=<strong admin password>`
 
-* **Application Layer**
-  Contains use cases and application logic, coordinating business rules and defining contracts for external services.
+Optional:
+- `KeyVault__VaultUri=https://<your-vault>.vault.azure.net/`
 
-* **Infrastructure Layer**
-  Handles database access, authentication implementation, file storage, and third-party integrations.
+### Frontend Static Web App
+Add environment variable:
 
-* **Presentation Layer**
-  Exposes functionality through RESTful APIs and frontend interfaces without containing business logic.
+- `VITE_API_BASE_URL=https://api-staging.silveria.se`
 
-### Key Principles
+## GitHub Secrets For Staging
 
-* Dependency rule: inner layers do not depend on outer layers
-* Business logic is isolated from frameworks
-* Clear contracts between layers
-* High testability and scalability
+### Backend workflow
+- `AZURE_BACKEND_APP_NAME_STAGING`
+- `AZURE_BACKEND_PUBLISH_PROFILE_STAGING`
 
-This structure allows the system to evolve safely as new capabilities—such as payments or analytics—are introduced.
+### Frontend workflow
+- `AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING`
+- `VITE_API_BASE_URL_STAGING`
 
-## Technical Architecture
+## Workflows
 
-The application is implemented as a decoupled full-stack solution:
+Staging deploy workflows are included:
+- `.github/workflows/backend-appservice-staging.yml`
+- `.github/workflows/frontend-staticwebapp-staging.yml`
 
-* A RESTful backend API responsible for authentication, business logic, and data persistence
-* A frontend single-page application consuming the API
-* A structured database layer supporting future transactional data
+## Security Hardening Already Added
 
-## Technology Stack
+- HTTPS redirection
+- HSTS outside development
+- security headers middleware
+- admin auth cookie support
+- rate limiting for auth/admin/upload
+- SQL Server-ready config
+- Blob Storage abstraction for uploads
 
-* **Backend:** ASP.NET Web API (.NET, C#)
-* **Frontend:** JavaScript SPA (e.g. React)
-* **Database:** SQL-based storage (SQLite during development)
-* **Authentication:** JWT-based authentication and authorization
-* **File Storage:** Server-side storage for product images
-* **Planned Integrations:** External payment provider APIs
-* **Version Control:** Git & GitHub
+## Recommended Next Operational Steps
 
-## Planning and Development Approach
-
-The project is planned and developed using a feature-driven and incremental approach. Functionality is divided into clearly defined modules with strict frontend and backend separation.
-
-Development follows an iterative process inspired by agile principles:
-
-* Backend APIs are designed first to define clear use cases
-* Frontend features are implemented against stable API contracts
-* Features are delivered incrementally to reduce risk
-* All changes are tracked through a structured Git workflow
-
-## Agile Development & Scrum
-
-The project applies **agile development practices inspired by Scrum**, focusing on iterative delivery and continuous improvement.
-
-Work is organized around:
-
-* User stories and technical tasks
-* Short development iterations
-* Incremental delivery of working features
-
-Scrum-inspired practices enable controlled growth of the system, early validation of functionality and a clear roadmap from core features to advanced capabilities such as payments and order management.
-
-## Roadmap
-
-* Core storefront and administrative functionality
-* Secure authentication and role-based access control
-* Payment processing and order handling
-* Inventory management and analytics
-
-## Purpose and Value
-
-This project demonstrates the design and implementation of a **production-oriented digital store platform**, highlighting clean architecture, API design, security, and scalability. It serves as a strong foundation for real-world e-commerce systems or further commercial development.
-
-## Project Status
-
-Actively developed with continuous improvements and planned feature expansion.
-
----
+1. Create Azure SQL, App Service, Static Web App and Blob Storage
+2. Add staging secrets in GitHub
+3. Deploy staging
+4. Bind staging domains
+5. Add Stripe test keys
+6. Verify upload, checkout and webhook flow
+7. Run security checks against staging

@@ -1,3 +1,4 @@
+using Backedn.Api.Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -12,10 +13,22 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false)
             .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddEnvironmentVariables()
             .Build();
 
+        var databaseOptions = config.GetSection("Database").Get<DatabaseOptions>() ?? new DatabaseOptions();
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        optionsBuilder.UseSqlite(config.GetConnectionString("DefaultConnection"));
+        var connectionString = config.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("DefaultConnection is missing.");
+
+        if (string.Equals(databaseOptions.Provider, "SqlServer", StringComparison.OrdinalIgnoreCase))
+        {
+            optionsBuilder.UseSqlServer(connectionString);
+        }
+        else
+        {
+            optionsBuilder.UseSqlite(connectionString);
+        }
 
         return new ApplicationDbContext(optionsBuilder.Options);
     }

@@ -1,35 +1,14 @@
 import axios from "axios";
 
 export const API_BASE =
-  typeof window !== "undefined" && window.location.port === "5173"
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== "undefined" && window.location.port === "5173"
     ? "http://localhost:5032"
-    : "";
-
-export function getStoredSession() {
-  const raw = localStorage.getItem("silveria_auth");
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw);
-  } catch {
-    localStorage.removeItem("silveria_auth");
-    return null;
-  }
-}
+    : "");
 
 export const http = axios.create({
   baseURL: API_BASE,
-});
-
-http.interceptors.request.use((config) => {
-  const session = getStoredSession();
-  if (session?.token) {
-    config.headers.Authorization = `Bearer ${session.token}`;
-  }
-
-  return config;
+  withCredentials: true,
 });
 
 export function extractApiError(error, fallbackMessage = "Något gick fel.") {

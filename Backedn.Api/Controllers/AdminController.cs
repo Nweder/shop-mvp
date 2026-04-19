@@ -5,6 +5,7 @@ using Backedn.Api.Infrastructure.Data;
 using Backedn.Api.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backedn.Api.Controllers;
@@ -12,6 +13,7 @@ namespace Backedn.Api.Controllers;
 [ApiController]
 [Route("api/admin")]
 [Authorize(Roles = AppRoles.Admin)]
+[EnableRateLimiting("admin")]
 public class AdminController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;
