@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
@@ -20,7 +20,7 @@ export default function Login() {
 
     try {
       await login(form);
-      navigate(location.state?.from || "/");
+      navigate(location.state?.from || "/admin");
     } catch (error) {
       setMessage(extractApiError(error, "Login misslyckades."));
     } finally {
@@ -32,9 +32,9 @@ export default function Login() {
     <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
       <section className="glass-panel rounded-[2rem] bg-[linear-gradient(135deg,rgba(23,53,42,0.98),rgba(14,23,36,0.96))] p-8 text-white">
         <div className="text-xs font-black uppercase tracking-[0.3em] text-white/55">Silveria Access</div>
-        <h1 className="font-display mt-4 text-5xl">Välkommen tillbaka</h1>
+        <h1 className="font-display mt-4 text-5xl">Admin inloggning</h1>
         <p className="mt-4 max-w-md text-white/75">
-          Logga in för att checka ut, se din orderhistorik och administrera butiken om du har adminroll.
+          Den här inloggningen är bara för dig som administrerar butiken. Kunder checkar ut som gäster utan konto.
         </p>
       </section>
 
@@ -68,9 +68,6 @@ export default function Login() {
         >
           {submitting ? "Loggar in..." : "Logga in"}
         </button>
-        <p className="mt-6 text-sm text-slate-500">
-          Inget konto än? <Link className="font-bold text-amber-800" to="/register">Registrera dig här</Link>
-        </p>
       </form>
     </div>
   );

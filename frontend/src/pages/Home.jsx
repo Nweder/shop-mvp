@@ -51,8 +51,8 @@ export default function Home() {
               <Link to="/shop" className="brand-button rounded-full px-6 py-3 text-sm font-extrabold uppercase tracking-[0.2em]">
                 Utforska shoppen
               </Link>
-              <Link to="/register" className="ghost-button rounded-full px-6 py-3 text-sm font-bold">
-                Skapa konto
+              <Link to="/checkout" className="ghost-button rounded-full px-6 py-3 text-sm font-bold">
+                Gäst-checkout
               </Link>
             </div>
           </div>

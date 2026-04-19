@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { extractApiError, http } from "../api/http";
-import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { formatPrice } from "../lib/format";
 
@@ -16,14 +15,9 @@ const initialForm = {
 };
 
 export default function Checkout() {
-  const { isAuthenticated, session } = useAuth();
   const { items, subtotal, shipping, total, clearCart } = useCart();
   const navigate = useNavigate();
-  const [form, setForm] = useState(() => ({
-    ...initialForm,
-    shippingEmail: session?.email ?? "",
-    shippingName: session?.fullName ?? "",
-  }));
+  const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,8 +34,8 @@ export default function Checkout() {
     try {
       const response = await http.post("/api/orders/checkout-session", {
         ...form,
-        successUrl: `${window.location.origin}/orders`,
-        cancelUrl: `${window.location.origin}/cart`,
+        successUrl: `${window.location.origin}/checkout/success`,
+        cancelUrl: `${window.location.origin}/cart?checkout=cancelled`,
         items: items.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
@@ -49,13 +43,12 @@ export default function Checkout() {
       });
 
       if (response.data.checkoutUrl) {
-        clearCart();
         window.location.assign(response.data.checkoutUrl);
         return;
       }
 
       clearCart();
-      navigate("/orders");
+      navigate(`/checkout/success?mode=created&orderId=${response.data.orderId}`);
     } catch (error) {
       setMessage(extractApiError(error, "Checkout kunde inte startas."));
     } finally {
@@ -63,23 +56,14 @@ export default function Checkout() {
     }
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="glass-panel rounded-[2rem] p-10 text-center">
-        <div className="font-display text-5xl text-slate-900">Logga in för att checka ut</div>
-        <p className="mt-4 text-slate-600">Vi behöver ett konto för att kunna knyta ordern till din orderhistorik.</p>
-        <Link to="/login" className="brand-button mt-8 inline-flex rounded-full px-6 py-3 text-sm font-extrabold uppercase tracking-[0.2em]">
-          Till login
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_22rem]">
       <form onSubmit={handleSubmit} className="glass-panel rounded-[2rem] p-6 sm:p-8">
         <div className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Checkout</div>
         <h1 className="font-display mt-2 text-5xl text-slate-900">Leveransuppgifter</h1>
+        <p className="mt-3 max-w-2xl text-sm text-slate-500">
+          Kunder checkar ut som gäster. Du behöver alltså inget kundkonto för att slutföra köpet.
+        </p>
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {Object.entries(form).map(([key, value]) => (
             <label key={key} className={key === "shippingAddressLine1" ? "sm:col-span-2" : ""}>

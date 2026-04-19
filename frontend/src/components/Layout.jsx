@@ -31,7 +31,6 @@ export default function Layout() {
           <nav className="hidden items-center gap-2 rounded-full border border-white/60 bg-white/45 p-2 md:flex">
             <NavLink to="/" className={navClass}>Hem</NavLink>
             <NavLink to="/shop" className={navClass}>Shop</NavLink>
-            <NavLink to="/orders" className={navClass}>Mina ordrar</NavLink>
             {isAdmin && <NavLink to="/admin" className={navClass}>Admin</NavLink>}
           </nav>
 
@@ -43,7 +42,7 @@ export default function Layout() {
               Varukorg
               <span className="rounded-full bg-slate-900 px-2 py-0.5 text-xs text-white">{count}</span>
             </NavLink>
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <>
                 <span className="hidden text-sm font-semibold text-slate-600 sm:inline">{userName}</span>
                 <button
@@ -54,13 +53,6 @@ export default function Layout() {
                   Logga ut
                 </button>
               </>
-            ) : (
-              <NavLink
-                to="/login"
-                className="brand-button rounded-full px-5 py-2 text-sm font-extrabold uppercase tracking-[0.18em]"
-              >
-                Logga in
-              </NavLink>
             )}
           </div>
         </div>

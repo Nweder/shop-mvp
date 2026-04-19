@@ -3,7 +3,7 @@ namespace Backedn.Api.Domain.Entities;
 public class Order
 {
     public int Id { get; set; }
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
     public ApplicationUser? User { get; set; }
     public string Status { get; set; } = "Pending";
     public string PaymentStatus { get; set; } = "Unpaid";

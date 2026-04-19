@@ -20,12 +20,6 @@ export function AuthProvider({ children }) {
     return response.data;
   }
 
-  async function register(payload) {
-    const response = await http.post("/api/auth/register", payload);
-    setSession(response.data);
-    return response.data;
-  }
-
   function logout() {
     setSession(null);
   }
@@ -37,7 +31,6 @@ export function AuthProvider({ children }) {
       isAdmin: Boolean(session?.roles?.includes("Admin")),
       userName: session?.fullName ?? "",
       login,
-      register,
       logout,
       extractApiError,
     }),

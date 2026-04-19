@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toAbsoluteImageUrl } from "../api/http";
 import { useCart } from "../context/CartContext";
 import { formatPrice } from "../lib/format";
 
 export default function Cart() {
+  const [searchParams] = useSearchParams();
   const { items, subtotal, shipping, vat, total, updateQuantity, removeItem } = useCart();
+  const checkoutState = searchParams.get("checkout");
 
   if (!items.length) {
     return (
@@ -21,6 +23,11 @@ export default function Cart() {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_22rem]">
       <section className="space-y-4">
+        {checkoutState === "cancelled" && (
+          <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5 text-amber-900">
+            Checkouten avbröts, så din varukorg ligger kvar här.
+          </div>
+        )}
         {items.map((item) => (
           <article key={item.id} className="glass-panel flex flex-col gap-5 rounded-[2rem] p-5 sm:flex-row sm:items-center">
             <img
