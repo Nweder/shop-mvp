@@ -1,22 +1,24 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiPost } from "../api/http";
 import './Admin.css'
 
 export default function Login() {
   const [email, setEmail] = useState("admin@webshop.se");
   const [password, setPassword] = useState("Admin123!");
-  const [msg, setMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   async function onSubmit(e) {
     e.preventDefault();
-    setMsg("");
+    setErrorMsg("");
 
     try {
       const data = await apiPost("/api/auth/login", { email, password });
       localStorage.setItem("token", data.token);
-      setMsg("✅ Inloggad. Token sparad i localStorage.");
+      navigate("/admin");
     } catch (err) {
-      setMsg(`❌ ${err.message}`);
+      setErrorMsg(`❌ ${err.message}`);
     }
   }
 
@@ -39,7 +41,7 @@ export default function Login() {
         <button type="submit">Login</button>
       </form>
 
-      {msg && <p style={{ marginTop: 12 }}>{msg}</p>}
+      {errorMsg && <p style={{ marginTop: 12 }}>{errorMsg}</p>}
     </div>
   );
 }
