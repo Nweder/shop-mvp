@@ -17,12 +17,12 @@ public class StripeCheckoutService
     }
 
     public bool IsConfigured =>
-        !string.IsNullOrWhiteSpace(_configuration["Stripe:SecretKey"]);
+        HasRealStripeSecretKey(_configuration["Stripe:SecretKey"]);
 
     public async Task<StripeCheckoutResult?> CreateCheckoutSessionAsync(Order order, string successUrl, string cancelUrl, CancellationToken cancellationToken = default)
     {
         var secretKey = _configuration["Stripe:SecretKey"];
-        if (string.IsNullOrWhiteSpace(secretKey))
+        if (!HasRealStripeSecretKey(secretKey))
         {
             return null;
         }
@@ -77,6 +77,16 @@ public class StripeCheckoutService
     private static int ToStripeAmount(decimal amount)
     {
         return (int)Math.Round(amount * 100m, MidpointRounding.AwayFromZero);
+    }
+
+    private static bool HasRealStripeSecretKey(string? secretKey)
+    {
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            return false;
+        }
+
+        return !secretKey.Contains("replace_me", StringComparison.OrdinalIgnoreCase);
     }
 }
 

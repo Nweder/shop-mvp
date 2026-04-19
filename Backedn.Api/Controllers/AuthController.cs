@@ -1,6 +1,5 @@
 using Backedn.Api.Domain.Entities;
 using Backedn.Api.Dtos.Auth;
-using Backedn.Api.Infrastructure.Security;
 using Backedn.Api.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,40 +18,6 @@ public class AuthController : ControllerBase
     {
         _userManager = userManager;
         _jwtTokenService = jwtTokenService;
-    }
-
-    [HttpPost("register")]
-    [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
-
-        var existing = await _userManager.FindByEmailAsync(request.Email);
-        if (existing != null)
-        {
-            return Conflict(new { message = "En användare med denna e-postadress finns redan." });
-        }
-
-        var user = new ApplicationUser
-        {
-            UserName = request.Email,
-            Email = request.Email,
-            EmailConfirmed = true,
-            FullName = request.FullName
-        };
-
-        var result = await _userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
-        {
-            return BadRequest(new { errors = result.Errors.Select(x => x.Description) });
-        }
-
-        await _userManager.AddToRoleAsync(user, AppRoles.Customer);
-
-        return await BuildAuthResponseAsync(user);
     }
 
     [HttpPost("login")]

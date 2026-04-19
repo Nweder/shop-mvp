@@ -32,7 +32,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("checkout-session")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<ActionResult<CreateCheckoutSessionResponse>> CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
@@ -41,11 +41,6 @@ public class OrdersController : ControllerBase
         }
 
         var userId = GetCurrentUserId();
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
         var requestedIds = request.Items.Select(x => x.ProductId).Distinct().ToList();
         var products = await _dbContext.Products
             .Where(x => requestedIds.Contains(x.Id) && x.IsActive)
@@ -80,7 +75,7 @@ public class OrdersController : ControllerBase
 
         var order = new Order
         {
-            UserId = userId.Value,
+            UserId = userId,
             ShippingName = request.ShippingName,
             ShippingEmail = request.ShippingEmail,
             ShippingPhone = request.ShippingPhone,

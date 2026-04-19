@@ -1,150 +1,101 @@
-import React, { useEffect, useState } from 'react'
-import './Home.css'
-import Logo from '../assets/logo-gold.svg'
-import HeroImg from '../assets/hero-placeholder.svg'
-import CatPerfume from '../assets/category-perfume.svg'
-import CatSilver from '../assets/category-silver.svg'
-import CatTshirt from '../assets/category-tshirt.svg'
-import { apiGet } from '../api/http'
-
-const fallbackProducts = []
-
-function formatPrice(v) {
-  if (v == null) return ''
-  // v may be number or string
-  const n = typeof v === 'number' ? v : parseFloat(v)
-  if (Number.isNaN(n)) return v
-  return n.toLocaleString('sv-SE', { style: 'currency', currency: 'SEK', maximumFractionDigits: 0 })
-}
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { extractApiError, http } from "../api/http";
+import ProductCard from "../components/ProductCard";
 
 export default function Home() {
-  const [products, setProducts] = useState(fallbackProducts)
-  const [loading, setLoading] = useState(true)
-  const [selectedCategory, setSelectedCategory] = useState('All')
-  // preferred order and thumbnails for categories; fallback uses first product image
-  const categoryOrder = ['Perfume', 'Silver', 'T-Shirt']
-  const categoryMeta = {
-    'Perfume': {thumb: CatPerfume},
-    'Silver': {thumb: CatSilver},
-    'T-Shirt': {thumb: CatTshirt}
-  }
+  const [products, setProducts] = useState([]);
+  const [status, setStatus] = useState({ loading: true, error: "" });
+
   useEffect(() => {
-    let mounted = true
-    async function load() {
+    let ignore = false;
+
+    async function loadProducts() {
       try {
-        const data = await apiGet('/api/products')
-        if (mounted) setProducts(data || [])
-      } catch (e) {
-        console.warn('Failed to load products', e)
-      } finally {
-        if (mounted) setLoading(false)
+        const response = await http.get("/api/products");
+        if (!ignore) {
+          setProducts(response.data.slice(0, 4));
+          setStatus({ loading: false, error: "" });
+        }
+      } catch (error) {
+        if (!ignore) {
+          setStatus({ loading: false, error: extractApiError(error, "Kunde inte hämta produkterna.") });
+        }
       }
     }
-    load()
-    return () => { mounted = false }
-  }, [])
 
-  // compute categories in preferred order, include any other categories afterwards
-  const catsFromProducts = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
-  const orderedCats = categoryOrder.filter(c => catsFromProducts.includes(c)).concat(catsFromProducts.filter(c => !categoryOrder.includes(c)));
-  const categoriesToRender = selectedCategory === 'All' ? orderedCats : [selectedCategory];
+    loadProducts();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
-    <div className="home-container">
-      {/* Category navigation */}
-      <div className="category-nav">
-        <button className={`category-chip ${selectedCategory==='All'?'active':''}`} onClick={() => setSelectedCategory('All')}>All</button>
-        {Array.from(new Set(products.map(p => p.category).filter(Boolean))).map(c => (
-          <button key={c} className={`category-chip ${selectedCategory===c?'active':''}`} onClick={() => setSelectedCategory(c)}>{c}</button>
-        ))}
-      </div>
-      <header style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
-          <img src={Logo} alt="logo" style={{height:56}} />
-          <div style={{fontFamily:"Playfair Display, serif", color:'#b78f2a', fontWeight:700, fontSize:20}}>WebShop</div>
-        </div>
-        <nav style={{display:'flex',gap:12,alignItems:'center'}}>
-          <a href="#">Nyheter</a>
-          <a href="#">Smycken</a>
-          <a href="#">Klockor</a>
-          <a className="btn btn-primary" href="#">Kundklubb</a>
-        </nav>
-      </header>
-
-      <section className="hero">
-        <div className="hero-left">
-          <h1 className="hero-title">REA — Upp till <span>50%</span> exklusivt utvalt</h1>
-          <p className="hero-sub">Skapa en tidlös look med våra bästa smycken. Begränsad upplaga — fri frakt över 499 kr.</p>
-          <div className="hero-actions">
-            <a className="btn btn-primary" href="#">Shoppa REA</a>
-            <a className="btn" href="#">Nyheter</a>
+    <div className="space-y-16">
+      <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="glass-panel fade-in relative overflow-hidden rounded-[2rem] px-6 py-8 sm:px-10 sm:py-12">
+          <div className="absolute inset-y-0 right-0 hidden w-48 bg-[radial-gradient(circle_at_center,rgba(197,157,66,0.18),transparent_70%)] lg:block" />
+          <div className="relative max-w-2xl space-y-6">
+            <div className="inline-flex rounded-full border border-amber-200 bg-amber-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-amber-900">
+              Silveria Spring Edit
+            </div>
+            <div className="space-y-4">
+              <h1 className="font-display text-5xl leading-none text-slate-900 sm:text-7xl">
+                Parfym och gulddetaljer för ett mer minnesvärt intryck.
+              </h1>
+              <p className="max-w-xl text-lg text-slate-600">
+                Silveria kombinerar doft, värme och presentkänsla i ett lugnt men lyxigt uttryck. Allt visas i SEK, med 25% moms och fast frakt på 99 kr.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/shop" className="brand-button rounded-full px-6 py-3 text-sm font-extrabold uppercase tracking-[0.2em]">
+                Utforska shoppen
+              </Link>
+              <Link to="/checkout" className="ghost-button rounded-full px-6 py-3 text-sm font-bold">
+                Gäst-checkout
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="hero-image">
-          <img src={HeroImg} alt="Hero" />
-        </div>
+
+        <aside className="grid gap-4">
+          <div className="glass-panel slide-up rounded-[2rem] p-6">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Leverans</div>
+            <div className="mt-2 font-display text-4xl text-slate-900">99 kr</div>
+            <p className="mt-2 text-sm text-slate-600">Enkel, fast frakt oavsett om du handlar parfym eller guldprodukter.</p>
+          </div>
+          <div className="glass-panel slide-up rounded-[2rem] bg-[linear-gradient(135deg,rgba(23,53,42,0.97),rgba(20,34,53,0.94))] p-6 text-white">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-white/60">Checkout</div>
+            <div className="mt-2 font-display text-4xl">Stripe-flöde</div>
+            <p className="mt-2 text-sm text-white/75">
+              Frontenden kommer att skicka dig vidare till Stripe Checkout när betalningen startar.
+            </p>
+          </div>
+        </aside>
       </section>
 
-      <h2 className="section-title">Produkter</h2>
-
-      {loading && <div style={{padding:12}}>Läser produkter…</div>}
-      {!loading && products.length === 0 && <div style={{padding:12}}>Inga produkter att visa.</div>}
-
-      {/* Render sections per category */}
-      {!loading && categoriesToRender.map(category => {
-        const items = products.filter(p => (p.category ?? 'Uncategorized') === category);
-        if (items.length === 0) return null;
-        return (
-          <section key={category} className="category-section">
-            <div className="category-header">
-              <h3 className="category-title">{category}</h3>
-              {categoryMeta[category]?.thumb ? <img className="category-thumb" src={categoryMeta[category].thumb} alt={category} /> : null}
-            </div>
-            <div className="category-products">
-              {items.map(p => (
-                <article className="product-card" key={p.id}>
-                  {p.price && <div className="badge">{p.discount ?? ''}</div>}
-                  <img src={p.imageUrl ?? HeroImg} alt={p.name ?? p.title} />
-                  <div className="product-title">{p.name ?? p.title}</div>
-                  <div className="price"><span className="old">{p.oldPrice ?? ''}</span>{formatPrice(p.price)}</div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )
-      })}
-
-      <div className="offers-grid">
-        <div className="offer" style={{background:'#17452b'}}>
+      <section className="space-y-6">
+        <div className="flex items-end justify-between gap-4">
           <div>
-            <h3>REA 50%</h3>
-            <p>Utvalda smycken</p>
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Utvalt</div>
+            <h2 className="font-display text-4xl text-slate-900">Några favoriter just nu</h2>
           </div>
+          <Link to="/shop" className="text-sm font-bold uppercase tracking-[0.25em] text-amber-800">
+            Se alla
+          </Link>
         </div>
-        <div className="offer" style={{background:'#b52b2b'}}>
-          <div>
-            <h3>Nyheter</h3>
-            <p>Exklusiva tillskott</p>
-          </div>
-        </div>
-        <div className="offer" style={{background:'#223a54'}}>
-          <div>
-            <h3>Fri frakt</h3>
-            <p>Över 499 kr</p>
-          </div>
-        </div>
-      </div>
 
-      <footer className="site-footer">
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-          <div>© 2026 WebShop</div>
-          <nav style={{display:'flex',gap:12}}>
-            <a href="#">Kontakt</a>
-            <a href="#">Leverans</a>
-            <a href="#">Villkor</a>
-          </nav>
-        </div>
-      </footer>
+        {status.loading && <div className="glass-panel rounded-[1.5rem] p-8 text-slate-500">Laddar produkter...</div>}
+        {status.error && <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 p-6 text-rose-700">{status.error}</div>}
+
+        {!status.loading && !status.error && (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
-  )
+  );
 }
