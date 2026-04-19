@@ -1,45 +1,77 @@
 import { useState } from "react";
-import { apiPost } from "../api/http";
-import './Admin.css'
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
-  const [email, setEmail] = useState("admin@webshop.se");
-  const [password, setPassword] = useState("Admin123!");
-  const [msg, setMsg] = useState("");
+  const { login, extractApiError } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [form, setForm] = useState({
+    email: "admin@silveria.se",
+    password: "Admin123!",
+  });
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  async function onSubmit(e) {
-    e.preventDefault();
-    setMsg("");
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setMessage("");
+    setSubmitting(true);
 
     try {
-      const data = await apiPost("/api/auth/login", { email, password });
-      localStorage.setItem("token", data.token);
-      setMsg("✅ Inloggad. Token sparad i localStorage.");
-    } catch (err) {
-      setMsg(`❌ ${err.message}`);
+      await login(form);
+      navigate(location.state?.from || "/");
+    } catch (error) {
+      setMessage(extractApiError(error, "Login misslyckades."));
+    } finally {
+      setSubmitting(false);
     }
   }
 
   return (
-    <div className="admin-container">
-      <h1>Admin Login</h1>
+    <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="glass-panel rounded-[2rem] bg-[linear-gradient(135deg,rgba(23,53,42,0.98),rgba(14,23,36,0.96))] p-8 text-white">
+        <div className="text-xs font-black uppercase tracking-[0.3em] text-white/55">Silveria Access</div>
+        <h1 className="font-display mt-4 text-5xl">Välkommen tillbaka</h1>
+        <p className="mt-4 max-w-md text-white/75">
+          Logga in för att checka ut, se din orderhistorik och administrera butiken om du har adminroll.
+        </p>
+      </section>
 
-      <form onSubmit={onSubmit} style={{ display: "grid", gap: 8 }}>
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-        />
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          type="password"
-        />
-        <button type="submit">Login</button>
+      <form onSubmit={handleSubmit} className="glass-panel rounded-[2rem] p-8">
+        <h2 className="font-display text-4xl text-slate-900">Logga in</h2>
+        <div className="mt-6 space-y-5">
+          <label>
+            <span className="field-label">E-post</span>
+            <input
+              className="field"
+              type="email"
+              value={form.email}
+              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+            />
+          </label>
+          <label>
+            <span className="field-label">Lösenord</span>
+            <input
+              className="field"
+              type="password"
+              value={form.password}
+              onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+            />
+          </label>
+        </div>
+        {message && <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{message}</div>}
+        <button
+          type="submit"
+          disabled={submitting}
+          className="brand-button mt-8 rounded-full px-6 py-3 text-sm font-extrabold uppercase tracking-[0.2em]"
+        >
+          {submitting ? "Loggar in..." : "Logga in"}
+        </button>
+        <p className="mt-6 text-sm text-slate-500">
+          Inget konto än? <Link className="font-bold text-amber-800" to="/register">Registrera dig här</Link>
+        </p>
       </form>
-
-      {msg && <p style={{ marginTop: 12 }}>{msg}</p>}
     </div>
   );
 }

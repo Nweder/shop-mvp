@@ -1,53 +1,66 @@
-// If running vite dev server (default port 5173) call backend at 5032.
-// When the frontend is served from the backend (production/static files),
-// use relative paths so the same origin is used.
-const API_BASE = (typeof window !== 'undefined' && window.location.port === '5173')
-  ? 'http://localhost:5032'
-  : '';
+import axios from "axios";
 
-function getToken() {
-  return localStorage.getItem("token");
+export const API_BASE =
+  typeof window !== "undefined" && window.location.port === "5173"
+    ? "http://localhost:5032"
+    : "";
+
+export function getStoredSession() {
+  const raw = localStorage.getItem("silveria_auth");
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    localStorage.removeItem("silveria_auth");
+    return null;
+  }
 }
 
-export async function apiGet(path) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+export const http = axios.create({
+  baseURL: API_BASE,
+});
+
+http.interceptors.request.use((config) => {
+  const session = getStoredSession();
+  if (session?.token) {
+    config.headers.Authorization = `Bearer ${session.token}`;
+  }
+
+  return config;
+});
+
+export function extractApiError(error, fallbackMessage = "Något gick fel.") {
+  const payload = error?.response?.data;
+  if (typeof payload === "string") {
+    return payload;
+  }
+
+  if (payload?.message) {
+    return payload.message;
+  }
+
+  if (Array.isArray(payload?.errors)) {
+    return payload.errors.join(", ");
+  }
+
+  if (payload?.errors && typeof payload.errors === "object") {
+    return Object.values(payload.errors).flat().join(", ");
+  }
+
+  return error?.message ?? fallbackMessage;
 }
 
-export async function apiPost(path, body) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
+export function toAbsoluteImageUrl(imageUrl) {
+  if (!imageUrl) {
+    return "";
+  }
 
-export async function apiUpload(path, formData) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: formData
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl;
+  }
 
-export async function apiDelete(path) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "DELETE",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) throw new Error(await res.text());
+  return `${API_BASE}${imageUrl}`;
 }
