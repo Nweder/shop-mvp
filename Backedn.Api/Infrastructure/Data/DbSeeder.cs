@@ -56,6 +56,18 @@ public static class DbSeeder
                 {
                     await userManager.AddToRoleAsync(adminUser, AppRoles.Customer);
                 }
+
+                var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+                var resetResult = await userManager.ResetPasswordAsync(adminUser, token, password);
+
+                if (!resetResult.Succeeded)
+                {
+                    var removeResult = await userManager.RemovePasswordAsync(adminUser);
+                    if (removeResult.Succeeded)
+                    {
+                        await userManager.AddPasswordAsync(adminUser, password);
+                    }
+                }
             }
         }
 
