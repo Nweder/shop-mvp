@@ -165,8 +165,9 @@ export default function AdminPanel() {
             <label>
               <span className="field-label">Kategori</span>
               <select className="field" value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}>
-                <option value="Parfym">Parfym</option>
                 <option value="Guld">Guld</option>
+                <option value="Parfym">Parfym</option>
+                <option value="Sliver">Sliver</option>
               </select>
             </label>
             <label>

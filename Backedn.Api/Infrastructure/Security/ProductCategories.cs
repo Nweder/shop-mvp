@@ -5,5 +5,7 @@ public static class ProductCategories
     public const string Guld = "Guld";
     public const string Parfym = "Parfym";
 
-    public static readonly string[] All = [Guld, Parfym];
+    public const string Sliver = "Parfym";
+
+    public static readonly string[] All = [Sliver, Guld, Parfym];
 }
