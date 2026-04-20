@@ -79,10 +79,27 @@ else
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>()?
+    .Where(x => !string.IsNullOrWhiteSpace(x))
+    .ToArray();
+
+if (allowedOrigins == null || allowedOrigins.Length == 0)
+{
+    allowedOrigins =
+    [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://www.silveria.se",
+        "https://silveria.se"
+    ];
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("frontend", p =>
-        p.WithOrigins("http://localhost:3000", "http://localhost:5173", "https://www.silveria.se", "https://silveria.se")
+        p.WithOrigins(allowedOrigins)
          .AllowAnyHeader()
          .AllowAnyMethod()
          .AllowCredentials());
