@@ -1,10 +1,10 @@
 import axios from "axios";
 
 export const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== "undefined" && window.location.port === "5173"
-    ? "http://localhost:5032"
-    : "");
+  (import.meta.env.VITE_API_BASE_URL ||
+    (typeof window !== "undefined" && window.location.port === "5173"
+      ? "http://localhost:5032"
+      : "")).replace(/\/$/, "");
 
 export const http = axios.create({
   baseURL: API_BASE,
@@ -13,6 +13,7 @@ export const http = axios.create({
 
 export function extractApiError(error, fallbackMessage = "Något gick fel.") {
   const payload = error?.response?.data;
+
   if (typeof payload === "string") {
     return payload;
   }
@@ -41,5 +42,9 @@ export function toAbsoluteImageUrl(imageUrl) {
     return imageUrl;
   }
 
-  return `${API_BASE}${imageUrl}`;
+  if (!API_BASE) {
+    return imageUrl;
+  }
+
+  return `${API_BASE}${imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`}`;
 }
