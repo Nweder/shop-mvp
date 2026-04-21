@@ -81,11 +81,13 @@ public class AuthController : ControllerBase
 
     private CookieOptions BuildCookieOptions()
     {
+        var isDevelopment = _environment.IsDevelopment();
+
         return new CookieOptions
         {
             HttpOnly = true,
-            Secure = !_environment.IsDevelopment(),
-            SameSite = SameSiteMode.Lax,
+            Secure = !isDevelopment,
+            SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.None,
             Expires = DateTimeOffset.UtcNow.AddHours(12),
             IsEssential = true,
             Path = "/"
