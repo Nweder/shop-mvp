@@ -32,6 +32,6 @@ public class AzureBlobFileStorageService : IFileStorageService
             },
             cancellationToken);
 
-        return new FileStorageResult(fileName, blobClient.Uri.ToString());
+        return new FileStorageResult(blobClient.Uri.ToString(), blobClient.Uri.ToString());
     }
 }

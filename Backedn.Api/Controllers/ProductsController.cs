@@ -128,7 +128,7 @@ public class ProductsController : ControllerBase
 
         if (!ProductCategories.All.Contains(request.Category))
         {
-            return BadRequest(new { message = "Ogiltig kategori. Tillåtna värden är Guld eller Parfym." });
+            return BadRequest(new { message = "Ogiltig kategori. Tillåtna värden är Silver, Guld eller Parfym." });
         }
 
         var product = await _dbContext.Products.Include(x => x.Images).FirstOrDefaultAsync(x => x.Id == id);
