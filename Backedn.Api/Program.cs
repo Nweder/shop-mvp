@@ -90,8 +90,8 @@ var requiredOrigins = new[]
     "https://calm-moss-092cfbf03.7.azurestaticapps.net",
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://www.silveria.se",
-    "https://silveria.se"
+    "https://www.18k.se",
+    "https://18k.se"
 };
 
 foreach (var origin in requiredOrigins)

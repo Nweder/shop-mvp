@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-const CART_STORAGE_KEY = "silveria_cart";
+const CART_STORAGE_KEY = "18k_cart";
 
 const CartContext = createContext(null);
 

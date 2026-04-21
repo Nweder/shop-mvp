@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useMemo, useState, useDeferredValue } from "react";
+import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import { extractApiError, http } from "../api/http";
 
@@ -53,7 +53,7 @@ export default function Shop() {
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
           <div>
             <div className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Shop</div>
-            <h1 className="font-display text-5xl text-slate-900">Bygg din Silveria-kombination</h1>
+            <h1 className="font-display text-5xl text-slate-900">Bygg din 18K-kombination</h1>
             <p className="mt-3 max-w-2xl text-slate-600">
               Filtrera mellan parfym och guld, sök på namn eller SKU och se priset direkt i SEK.
             </p>

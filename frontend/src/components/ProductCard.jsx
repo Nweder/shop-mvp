@@ -15,7 +15,7 @@ export default function ProductCard({ product }) {
 
   const imageSrc =
     toAbsoluteImageUrl(product.primaryImageUrl) ||
-    "https://placehold.co/800x1000/f6f0e3/84662d?text=Silveria";
+    "https://placehold.co/800x1000/f6f0e3/84662d?text=18K";
 
   return (
     <article className="glass-panel slide-up flex h-full flex-col overflow-hidden rounded-[1.75rem]">
@@ -45,12 +45,8 @@ export default function ProductCard({ product }) {
 
         <div className="mt-auto flex items-center justify-between gap-3">
           <div>
-            <div className="text-2xl font-black text-slate-900">
-              {formatPrice(product.price)}
-            </div>
-            <div className="text-xs uppercase tracking-[0.28em] text-slate-400">
-              {product.stock} i lager
-            </div>
+            <div className="text-2xl font-black text-slate-900">{formatPrice(product.price)}</div>
+            <div className="text-xs uppercase tracking-[0.28em] text-slate-400">{product.stock} i lager</div>
           </div>
 
           <button

@@ -37,14 +37,14 @@ export default function Home() {
           <div className="absolute inset-y-0 right-0 hidden w-48 bg-[radial-gradient(circle_at_center,rgba(197,157,66,0.18),transparent_70%)] lg:block" />
           <div className="relative max-w-2xl space-y-6">
             <div className="inline-flex rounded-full border border-amber-200 bg-amber-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.35em] text-amber-900">
-              Silveria Spring Edit
+              18K Signature Edit
             </div>
             <div className="space-y-4">
               <h1 className="font-display text-5xl leading-none text-slate-900 sm:text-7xl">
                 Parfym och gulddetaljer för ett mer minnesvärt intryck.
               </h1>
               <p className="max-w-xl text-lg text-slate-600">
-                Silveria kombinerar doft, värme och presentkänsla i ett lugnt men lyxigt uttryck. Allt visas i SEK, med 25% moms och fast frakt på 99 kr.
+                18K kombinerar doft, värme och gulddetaljer i ett lugnt men exklusivt uttryck. Allt visas i SEK, med 25% moms och fast frakt på 99 kr.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

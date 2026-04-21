@@ -31,7 +31,7 @@ export default function Cart() {
         {items.map((item) => (
           <article key={item.id} className="glass-panel flex flex-col gap-5 rounded-[2rem] p-5 sm:flex-row sm:items-center">
             <img
-              src={toAbsoluteImageUrl(item.imageUrl) || "https://placehold.co/240x240/f6f0e3/84662d?text=Silveria"}
+              src={toAbsoluteImageUrl(item.imageUrl) || "https://placehold.co/240x240/f6f0e3/84662d?text=18K"}
               alt={item.name}
               className="h-28 w-28 rounded-[1.25rem] object-cover"
             />

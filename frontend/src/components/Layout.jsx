@@ -19,12 +19,12 @@ export default function Layout() {
       <header className="sticky top-0 z-30 border-b border-white/40 bg-[rgba(252,248,239,0.82)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <NavLink to="/" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[radial-gradient(circle_at_top,#f3deb0,#c59d42_62%,#7d5a18)] text-lg font-black text-slate-950 shadow-lg">
-              S
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[radial-gradient(circle_at_top,#f3deb0,#c59d42_62%,#7d5a18)] text-sm font-black text-slate-950 shadow-lg">
+              18K
             </div>
             <div>
-              <div className="font-display text-3xl font-semibold leading-none text-slate-900">Silveria</div>
-              <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Modern atelier</div>
+              <div className="font-display text-3xl font-semibold leading-none text-slate-900">18K</div>
+              <div className="text-xs uppercase tracking-[0.35em] text-slate-500">Fine scent & gold</div>
             </div>
           </NavLink>
 

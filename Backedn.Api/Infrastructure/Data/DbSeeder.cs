@@ -36,7 +36,7 @@ public static class DbSeeder
                     UserName = email,
                     Email = email,
                     EmailConfirmed = true,
-                    FullName = "Silveria Admin"
+                    FullName = "18K Admin"
                 };
 
                 var result = await userManager.CreateAsync(adminUser, password);
@@ -79,12 +79,12 @@ public static class DbSeeder
         db.Products.AddRange(
             new Product
             {
-                Name = "Silveria No. 1",
+                Name = "18K No. 1",
                 Description = "En signaturdoft med mjuka noter av citrus, amber och vit mysk.",
                 Category = ProductCategories.Parfym,
                 Price = 899m,
                 Stock = 24,
-                Sku = "SIL-PAR-001",
+                Sku = "18K-PAR-001",
                 IsActive = true,
                 Images =
                 {
@@ -98,12 +98,12 @@ public static class DbSeeder
             },
             new Product
             {
-                Name = "Silveria Guldarmband",
+                Name = "18K Guldarmband",
                 Description = "Elegant armband i varm guldfinish som passar både vardag och fest.",
                 Category = ProductCategories.Guld,
                 Price = 1499m,
                 Stock = 12,
-                Sku = "SIL-GULD-001",
+                Sku = "18K-GULD-001",
                 IsActive = true,
                 Images =
                 {

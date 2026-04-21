@@ -48,7 +48,7 @@ export default function ProductDetail() {
     <div className="grid gap-8 lg:grid-cols-[1fr_0.85fr]">
       <section className="glass-panel rounded-[2rem] p-4 sm:p-6">
         <img
-          src={toAbsoluteImageUrl(product.primaryImageUrl) || "https://placehold.co/1200x1400/f6f0e3/84662d?text=Silveria"}
+          src={toAbsoluteImageUrl(product.primaryImageUrl) || "https://placehold.co/1200x1400/f6f0e3/84662d?text=18K"}
           alt={product.name}
           className="h-[28rem] w-full rounded-[1.5rem] object-cover sm:h-[38rem]"
         />

@@ -7,7 +7,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({
-    email: "admin@silveria.se",
+    email: "admin@18k.se",
     password: "Admin123!",
   });
   const [message, setMessage] = useState("");
@@ -31,7 +31,7 @@ export default function Login() {
   return (
     <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
       <section className="glass-panel rounded-[2rem] bg-[linear-gradient(135deg,rgba(23,53,42,0.98),rgba(14,23,36,0.96))] p-8 text-white">
-        <div className="text-xs font-black uppercase tracking-[0.3em] text-white/55">Silveria Access</div>
+        <div className="text-xs font-black uppercase tracking-[0.3em] text-white/55">18K Access</div>
         <h1 className="font-display mt-4 text-5xl">Admin inloggning</h1>
         <p className="mt-4 max-w-md text-white/75">
           Den här inloggningen är bara för dig som administrerar butiken. Kunder checkar ut som gäster utan konto.

@@ -1,6 +1,6 @@
-# Silveria
+# 18K
 
-Silveria is a production-oriented e-commerce platform with:
+18K is a production-oriented e-commerce platform with:
 - ASP.NET Core Web API backend
 - React storefront frontend
 - Stripe checkout support
@@ -52,15 +52,15 @@ Create an Azure App Service for the API and configure these app settings:
 - `ConnectionStrings__DefaultConnection=<azure sql connection string>`
 - `Database__Provider=SqlServer`
 - `Jwt__Key=<long random secret>`
-- `Jwt__Issuer=Silveria.Staging`
-- `Jwt__Audience=Silveria.Frontend.Staging`
+- `Jwt__Issuer=18K.Staging`
+- `Jwt__Audience=18K.Frontend.Staging`
 - `Stripe__SecretKey=<stripe test secret>`
 - `Stripe__PublishableKey=<stripe test publishable>`
 - `Stripe__WebhookSecret=<stripe webhook secret>`
 - `BlobStorage__ConnectionString=<azure blob connection string>`
 - `BlobStorage__ContainerName=product-images-staging`
-- `Security__AdminCookieName=silveria_admin_staging`
-- `AdminSeed__Email=admin@silveria.se`
+- `Security__AdminCookieName=18k_admin_staging`
+- `AdminSeed__Email=admin@18k.se`
 - `AdminSeed__Password=<strong admin password>`
 
 Optional:
@@ -69,7 +69,7 @@ Optional:
 ### Frontend Static Web App
 Add environment variable:
 
-- `VITE_API_BASE_URL=https://api-staging.silveria.se`
+- `VITE_API_BASE_URL=https://api-staging.18k.se`
 
 ## GitHub Secrets For Staging
 
