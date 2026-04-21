@@ -83,23 +83,29 @@ var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>()?
     .Where(x => !string.IsNullOrWhiteSpace(x))
-    .ToArray();
+    .ToList() ?? new List<string>();
 
-if (allowedOrigins == null || allowedOrigins.Length == 0)
+var requiredOrigins = new[]
 {
-    allowedOrigins =
-    [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://www.silveria.se",
-        "https://silveria.se"
-    ];
+    "https://calm-moss-092cfbf03.7.azurestaticapps.net",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://www.silveria.se",
+    "https://silveria.se"
+};
+
+foreach (var origin in requiredOrigins)
+{
+    if (!allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
+    {
+        allowedOrigins.Add(origin);
+    }
 }
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("frontend", p =>
-        p.WithOrigins(allowedOrigins)
+        p.WithOrigins(allowedOrigins.ToArray())
          .AllowAnyHeader()
          .AllowAnyMethod()
          .AllowCredentials());
