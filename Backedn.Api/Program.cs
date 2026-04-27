@@ -11,9 +11,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Logging;
-using Backedn.Api.Infrastructure.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +25,7 @@ if (!string.IsNullOrWhiteSpace(keyVaultUri))
 builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection("Database"));
 builder.Services.Configure<BlobStorageOptions>(builder.Configuration.GetSection("BlobStorage"));
 builder.Services.Configure<SecurityOptions>(builder.Configuration.GetSection("Security"));
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
@@ -63,6 +63,7 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<OrderPricingService>();
 builder.Services.AddScoped<StripeWebhookService>();
@@ -132,6 +133,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
+
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -154,6 +156,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
     options.AddPolicy("auth", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "auth",
@@ -163,6 +166,7 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(5),
                 QueueLimit = 0
             }));
+
     options.AddPolicy("admin", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             context.User.Identity?.Name ?? context.Connection.RemoteIpAddress?.ToString() ?? "admin",
@@ -172,6 +176,7 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
             }));
+
     options.AddPolicy("upload", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             context.User.Identity?.Name ?? context.Connection.RemoteIpAddress?.ToString() ?? "upload",
@@ -185,21 +190,17 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+try
 {
-    try
-    {
-        await DbSeeder.SeedAsync(app.Services, app.Configuration);
-    }
-    catch (Exception ex)
-    {
-        var logger = app.Services.GetRequiredService<ILoggerFactory>()
-            .CreateLogger("DbSeeder");
-
-        logger.LogError(ex, "Database seeding failed during startup.");
-    }
+    await DbSeeder.SeedAsync(app.Services, app.Configuration);
 }
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILoggerFactory>()
+        .CreateLogger("DbSeeder");
 
+    logger.LogError(ex, "Database seeding failed during startup.");
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -210,10 +211,6 @@ else
 {
     app.UseHsts();
 }
-
-
-builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
-builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 app.UseHttpsRedirection();
 app.UseMiddleware<SecurityHeadersMiddleware>();
