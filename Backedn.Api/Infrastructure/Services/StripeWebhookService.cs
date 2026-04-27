@@ -10,19 +10,11 @@ public class StripeWebhookService
 {
     private readonly IConfiguration _configuration;
     private readonly ApplicationDbContext _dbContext;
-    private readonly IEmailService _emailService;
-    private readonly ILogger<StripeWebhookService> _logger;
 
-    public StripeWebhookService(
-        IConfiguration configuration,
-        ApplicationDbContext dbContext,
-        IEmailService emailService,
-        ILogger<StripeWebhookService> logger)
+    public StripeWebhookService(IConfiguration configuration, ApplicationDbContext dbContext)
     {
         _configuration = configuration;
         _dbContext = dbContext;
-        _emailService = emailService;
-        _logger = logger;
     }
 
     public bool TryValidateSignature(string payload, string? stripeSignatureHeader)
@@ -60,7 +52,6 @@ public class StripeWebhookService
         using var document = JsonDocument.Parse(payload);
         var root = document.RootElement;
         var type = root.GetProperty("type").GetString();
-
         if (!string.Equals(type, "checkout.session.completed", StringComparison.Ordinal))
         {
             return false;
@@ -68,7 +59,6 @@ public class StripeWebhookService
 
         var dataObject = root.GetProperty("data").GetProperty("object");
         var orderIdRaw = dataObject.GetProperty("metadata").GetProperty("orderId").GetString();
-
         if (!int.TryParse(orderIdRaw, out var orderId))
         {
             return false;
@@ -77,7 +67,6 @@ public class StripeWebhookService
         var order = await _dbContext.Orders
             .Include(x => x.Items)
             .FirstOrDefaultAsync(x => x.Id == orderId, cancellationToken);
-
         if (order == null)
         {
             return false;
@@ -92,15 +81,10 @@ public class StripeWebhookService
         order.Status = "Confirmed";
         order.PaidAt = DateTime.UtcNow;
         order.StripeCheckoutSessionId = dataObject.GetProperty("id").GetString();
-        order.StripePaymentIntentId = dataObject.TryGetProperty("payment_intent", out var paymentIntent)
-            ? paymentIntent.GetString()
-            : order.StripePaymentIntentId;
+        order.StripePaymentIntentId = dataObject.TryGetProperty("payment_intent", out var paymentIntent) ? paymentIntent.GetString() : order.StripePaymentIntentId;
 
         var productIds = order.Items.Select(x => x.ProductId).Distinct().ToList();
-        var products = await _dbContext.Products
-            .Where(x => productIds.Contains(x.Id))
-            .ToListAsync(cancellationToken);
-
+        var products = await _dbContext.Products.Where(x => productIds.Contains(x.Id)).ToListAsync(cancellationToken);
         foreach (var item in order.Items)
         {
             var product = products.FirstOrDefault(x => x.Id == item.ProductId);
@@ -112,17 +96,6 @@ public class StripeWebhookService
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-
-        try
-        {
-            await _emailService.SendOrderConfirmationToCustomerAsync(order, cancellationToken);
-            await _emailService.SendNewOrderNotificationToAdminAsync(order, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Order {OrderId} blev betald men ordermail kunde inte skickas.", order.Id);
-        }
-
         return true;
     }
 }

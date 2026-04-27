@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Logging;
-using Backedn.Api.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -210,10 +209,6 @@ else
 {
     app.UseHsts();
 }
-
-
-builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
-builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 
 app.UseHttpsRedirection();
 app.UseMiddleware<SecurityHeadersMiddleware>();
