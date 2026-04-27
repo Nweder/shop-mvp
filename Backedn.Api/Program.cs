@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -183,7 +184,21 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-// await DbSeeder.SeedAsync(app.Services, app.Configuration);
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        await DbSeeder.SeedAsync(app.Services, app.Configuration);
+    }
+    catch (Exception ex)
+    {
+        var logger = app.Services.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("DbSeeder");
+
+        logger.LogError(ex, "Database seeding failed during startup.");
+    }
+}
+
 
 if (app.Environment.IsDevelopment())
 {
