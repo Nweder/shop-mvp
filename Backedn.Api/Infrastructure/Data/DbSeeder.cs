@@ -26,9 +26,11 @@ public static class DbSeeder
 
         var email = config["AdminSeed:Email"];
         var password = config["AdminSeed:Password"];
+
         if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
         {
             var adminUser = await userManager.Users.FirstOrDefaultAsync(x => x.Email == email);
+
             if (adminUser == null)
             {
                 adminUser = new ApplicationUser
@@ -40,6 +42,7 @@ public static class DbSeeder
                 };
 
                 var result = await userManager.CreateAsync(adminUser, password);
+
                 if (result.Succeeded)
                 {
                     await userManager.AddToRolesAsync(adminUser, new[] { AppRoles.Admin, AppRoles.Customer });
@@ -55,18 +58,6 @@ public static class DbSeeder
                 if (!await userManager.IsInRoleAsync(adminUser, AppRoles.Customer))
                 {
                     await userManager.AddToRoleAsync(adminUser, AppRoles.Customer);
-                }
-
-                var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
-                var resetResult = await userManager.ResetPasswordAsync(adminUser, token, password);
-
-                if (!resetResult.Succeeded)
-                {
-                    var removeResult = await userManager.RemovePasswordAsync(adminUser);
-                    if (removeResult.Succeeded)
-                    {
-                        await userManager.AddPasswordAsync(adminUser, password);
-                    }
                 }
             }
         }
