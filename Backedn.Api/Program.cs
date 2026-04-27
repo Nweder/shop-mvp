@@ -183,7 +183,7 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
-await DbSeeder.SeedAsync(app.Services, app.Configuration);
+// await DbSeeder.SeedAsync(app.Services, app.Configuration);
 
 if (app.Environment.IsDevelopment())
 {
