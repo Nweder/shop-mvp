@@ -18,17 +18,23 @@ public class OrdersController : ControllerBase
     private readonly OrderPricingService _pricingService;
     private readonly StripeCheckoutService _stripeCheckoutService;
     private readonly StripeWebhookService _stripeWebhookService;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<OrdersController> _logger;
 
     public OrdersController(
         ApplicationDbContext dbContext,
         OrderPricingService pricingService,
         StripeCheckoutService stripeCheckoutService,
-        StripeWebhookService stripeWebhookService)
+        StripeWebhookService stripeWebhookService,
+        IEmailService emailService,
+        ILogger<OrdersController> logger)
     {
         _dbContext = dbContext;
         _pricingService = pricingService;
         _stripeCheckoutService = stripeCheckoutService;
         _stripeWebhookService = stripeWebhookService;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     [HttpPost("checkout-session")]
@@ -93,11 +99,33 @@ public class OrdersController : ControllerBase
         _dbContext.Orders.Add(order);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var stripeResult = await _stripeCheckoutService.CreateCheckoutSessionAsync(order, request.SuccessUrl, request.CancelUrl, cancellationToken);
+        var stripeResult = await _stripeCheckoutService.CreateCheckoutSessionAsync(
+            order,
+            request.SuccessUrl,
+            request.CancelUrl,
+            cancellationToken);
+
         if (stripeResult != null)
         {
             order.StripeCheckoutSessionId = stripeResult.SessionId;
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            // Fallback när Stripe inte är aktivt: markera ordern som bekräftad lokalt
+            order.Status = "Confirmed";
+            order.PaymentStatus = "Pending";
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            try
+            {
+                await _emailService.SendOrderConfirmationToCustomerAsync(order, cancellationToken);
+                await _emailService.SendNewOrderNotificationToAdminAsync(order, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kunde inte skicka ordermail för lokal order {OrderId}.", order.Id);
+            }
         }
 
         return Ok(new CreateCheckoutSessionResponse
